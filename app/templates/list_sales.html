@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Sales History</h1>
+    <p><a href="{{ url_for('record_sale') }}">Record New Sale</a></p>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Product Name</th>
+                <th>Qty Sold</th>
+                <th>Sale Price (Unit)</th>
+                <th>Cost Price (Unit)</th> {# New column #}
+                <th>Total Revenue</th>
+                <th>Total Cost</th> {# New column #}
+                <th>Profit</th> {# New column #}
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+            <tr>
+                <td>{{ sale.id }}</td>
+                <td>{{ sale.product.name }}</td>
+                <td>{{ sale.quantity_sold }}</td>
+                <td>{{ "%.2f"|format(sale.sale_price_at_time) }}</td>
+                <td>{{ "%.2f"|format(sale.cost_price_at_time_of_sale) }}</td> {# Display cost price #}
+                <td>{{"%.2f"|format(sale.quantity_sold * sale.sale_price_at_time)}}</td>
+                <td>{{"%.2f"|format(sale.quantity_sold * sale.cost_price_at_time_of_sale)}}</td> {# Display total cost for this sale #}
+                {% set profit = (sale.sale_price_at_time - sale.cost_price_at_time_of_sale) * sale.quantity_sold %}
+                <td>{{ "%.2f"|format(profit) }}</td> {# Display profit #}
+                <td>{{ sale.sale_date.strftime('%Y-%m-%d %H:%M:%S') if sale.sale_date else 'N/A' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9">No sales recorded yet.</td> {# Adjusted colspan #}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

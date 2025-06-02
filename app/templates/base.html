@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+    <head>
+        {% if title %}
+        <title>{{ title }} - POS App</title>
+        {% else %}
+        <title>POS App</title>
+        {% endif %}
+    </head>
+    <body>
+        <div>
+            POS App:
+            <a href="{{ url_for('index') }}">Home</a>
+            {% if current_user.is_anonymous %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('register') }}">Register</a>
+            {% else %}
+            <a href="{{ url_for('list_products') }}">Products</a>
+            <a href="{{ url_for('list_purchases') }}">Purchases</a>
+            <a href="{{ url_for('list_sales') }}">Sales</a>
+            <a href="{{ url_for('report_summary') }}">Profit Report</a> <!-- Add this link -->
+            <span>Hi, {{ current_user.username }}!</span>
+            <a href="{{ url_for('logout') }}">Logout</a>
+            {% endif %}
+        </div>
+        <hr>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+    </body>
+</html>

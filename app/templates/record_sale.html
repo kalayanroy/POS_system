@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Record New Sale</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.product.label }}<br>
+            {{ form.product(id="sale_product_select") }}<br> {# Added id for potential JS interaction #}
+            {% for error in form.product.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.quantity.label }}<br>
+            {{ form.quantity(size=20) }}<br>
+            {% for error in form.quantity.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {% if form.product.data %}
+            <small>Available: {{ form.product.data.quantity }}</small>
+            {% endif %}
+        </p>
+        <p>
+            {{ form.sale_price.label }}<br>
+            {{ form.sale_price(size=20, id="sale_price_input") }}<br> {# Added id for potential JS interaction #}
+            {% for error in form.sale_price.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+
+    {# Optional: Script to auto-update sale price when product selection changes #}
+    {# This requires passing product prices to the template or an AJAX call #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productSelect = document.getElementById('sale_product_select');
+            const salePriceInput = document.getElementById('sale_price_input');
+
+            // Store product prices (example - needs to be populated from server)
+            // This is a simplified example. A better way is to use a dedicated endpoint or embed a JSON dict.
+            const productPrices = {
+                {% for p in get_products() %}
+                    "{{ p.id }}": {{ p.sale_price if p.sale_price is not none else '0.0' }}{{ "," if not loop.last }}
+                {% endfor %}
+            };
+
+            if (productSelect && salePriceInput) { // Ensure both elements exist
+                productSelect.addEventListener('change', function() {
+                    const selectedProductId = this.value;
+                    if (selectedProductId && productPrices[selectedProductId] !== undefined) {
+                        salePriceInput.value = productPrices[selectedProductId];
+                    } else if (selectedProductId === "") { // Handle "allow_blank" if it were true
+                            salePriceInput.value = "";
+                    }
+                });
+
+                // Trigger change on load if a product is already selected (e.g. after validation error or server prefill)
+                // This ensures the price field is correctly set when the page loads with a selection.
+                if (productSelect.value && productPrices[productSelect.value] !== undefined) {
+                    // If the sale_price field is empty OR if it's different from the selected product's default sale price
+                    // (This handles cases where server might have pre-filled it, but also if it was empty)
+                    // For simplicity, we can just set it if it's different or let server-side prefill take precedence
+                    // The python route logic already tries to prefill, this JS is a fallback or dynamic update.
+                    // Let's make it so JS updates it if the current value is empty or doesn't match the selected product's price
+                    // This will respect server-side prefill if it happened, otherwise it updates.
+                    // However, the current server-side logic for GET in record_sale might already set form.sale_price.data
+                    // which then renders into salePriceInput.value.
+                    // So, this JS might primarily be for user-driven changes post-load.
+                    // Let's simplify: if a product is selected, and the price input is empty, fill it.
+                    // Or, always fill it to match the product selected, overriding any stale data if not careful.
+                    // The route's GET logic tries to set form.sale_price.data.
+                    // If that value is rendered, this JS will see it.
+                    // If user changes selection, this JS updates.
+                    // If form reloads due to error, Python GET logic repopulates form.sale_price.data.
+                    // So, the most important part of this JS is the 'change' event listener.
+                    // The initial fill on DOMContentLoaded can be a safety net or for cases where Python didn't prefill.
+                    if (!salePriceInput.value || parseFloat(salePriceInput.value) !== productPrices[productSelect.value]) {
+                        // If value is not set, or if it is set but doesn't match the selected product's price (e.g. stale from user input before error)
+                        // For now, let's just ensure it updates if the product is selected.
+                        // The Python GET handler is more robust for initial load.
+                        // This JS will primarily handle dynamic changes.
+                        // salePriceInput.value = productPrices[productSelect.value]; // This line might be too aggressive on load
+                    }
+
+                } else if (productSelect.value === "" && salePriceInput) {
+                    // salePriceInput.value = ""; // Clear if blank is selected
+                }
+            }
+        });
+    </script>
+{% endblock %}
