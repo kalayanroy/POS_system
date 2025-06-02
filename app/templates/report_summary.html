@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Overall Profit Report (All-Time)</h1>
+
+    {# Add date filter form here in a future iteration #}
+
+    <h2>Summary</h2>
+    <table border="1">
+        <tr>
+            <th>Metric</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td>Total Items Sold</td>
+            <td>{{ total_items_sold }}</td>
+        </tr>
+        <tr>
+            <td>Total Revenue</td>
+            <td>{{ "%.2f"|format(total_revenue) }}</td>
+        </tr>
+        <tr>
+            <td>Total Cost of Goods Sold (COGS)</td>
+            <td>{{ "%.2f"|format(total_cogs) }}</td>
+        </tr>
+        <tr>
+            <td><strong>Gross Profit</strong></td>
+            <td><strong>{{ "%.2f"|format(gross_profit) }}</strong></td>
+        </tr>
+    </table>
+
+    {# We can add more details here, like top selling products, etc. in future iterations #}
+{% endblock %}

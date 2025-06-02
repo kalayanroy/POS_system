@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Product List</h1>
+    <p><a href="{{ url_for('add_product') }}">Add New Product</a></p>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Purchase Price</th>
+                <th>Sale Price</th>
+                <th>Quantity</th>
+                <!-- Add actions column if needed later -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.description }}</td>
+                <td>{{ product.purchase_price }}</td>
+                <td>{{ product.sale_price }}</td>
+                <td>{{ product.quantity }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">No products found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
